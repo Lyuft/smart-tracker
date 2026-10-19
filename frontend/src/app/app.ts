@@ -1,8 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { TuiRoot } from '@taiga-ui/core';
+import { Component } from '@angular/core';
 
 @Component({
-  imports: [RouterOutlet],
+  imports: [TuiRoot],
   selector: 'app-root',
   styleUrl: './app.less',
   templateUrl: './app.html',
