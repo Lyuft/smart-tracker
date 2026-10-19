@@ -33,6 +33,41 @@ services:
       timeout: 3s
       retries: 10
 
+    # --- Профиль "full": поднимает сами приложения ---
+  backend:
+    profiles: [ "full" ]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tracker-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-tracker}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-tracker}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-tracker}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+
+  frontend:
+    profiles: [ "full" ]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tracker-frontend
+    depends_on:
+      - backend
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080/api/v1
+    ports:
+      - "5173:5173"
+
 volumes:
   postgres_data:
   redis_data:
