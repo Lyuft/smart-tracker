@@ -5,7 +5,13 @@
   "compilerOptions": {
     "types": [
       "vitest/globals"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@modules/*": ["src/app/modules/*"],
+      "@core/*": ["src/app/core/*"],
+      "@features/*": ["src/app/features/*"]
+    }
   },
   "include": [
     "src/**/*.d.ts",
