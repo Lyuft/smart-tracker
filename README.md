@@ -9,6 +9,7 @@
 
 Выполни в терминале в корне проекта:
 
+
 docker compose --profile full up --build
 
 Чтобы остановить — нажми Ctrl + C в терминале.
