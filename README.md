@@ -34,6 +34,18 @@ docker compose --profile full up --build
 
 Docker (выполнять в корне проекта):
 
+docker compose --profile full build - собрать вообще всё (и бэк, и фронт)
+
+docker compose --profile full build frontend - собрать только фронт
+
+docker compose --profile full build backend - собрать только бэк
+
+docker compose --profile full up -d --build frontend - собрать и запустить фронт (и всё, от чего он зависит: backend, postgres, redis)
+
+docker compose --profile full up -d --build backend - собрать и запустить только бэк (и его зависимости: postgres, redis)
+
+docker compose up -d postgres redis - запустить только БД в фоне
+
 docker compose ps — посмотреть, какие контейнеры сейчас работают.
 
 docker compose logs -f backend — смотреть логи бэкенда в реальном времени (очень помогает искать ошибки).
