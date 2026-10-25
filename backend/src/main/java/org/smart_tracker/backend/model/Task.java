@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import org.smart_tracker.backend.dto.Priority;
+
 import java.time.OffsetDateTime;
 
 @Entity
@@ -28,6 +30,16 @@ public class Task {
 
     @Column(name = "created_at", updatable = false)
     private OffsetDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Priority priority = Priority.MEDIUM;
+
+    @Column(name = "from_date")
+    private OffsetDateTime fromDate;
+
+    @Column(name = "to_date")
+    private OffsetDateTime toDate;
 
     @PrePersist
     protected void onCreate() {

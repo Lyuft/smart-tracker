@@ -1,8 +1,11 @@
 package org.smart_tracker.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.smart_tracker.backend.dto.Priority;
 import org.smart_tracker.backend.dto.request.TaskRequest;
+import org.smart_tracker.backend.dto.request.TaskUpdateRequest;
 import org.smart_tracker.backend.dto.response.TaskResponse;
+import org.smart_tracker.backend.exception.ResourceNotFoundException;
 import org.smart_tracker.backend.model.Task;
 import org.smart_tracker.backend.repo.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -35,26 +38,25 @@ public class TaskService {
         Task task = new Task();
         task.setTitle(request.title());
         task.setDescription(request.description());
-        return TaskResponse.from(taskRepository.save(task));
-    }
+        task.setPriority(request.priority() != null ? request.priority() : Priority.MEDIUM);
+        task.setFromDate(request.from());
+        task.setToDate(request.to());
 
-    @Transactional
-    public TaskResponse updateTask(Long id, TaskRequest request) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
-
-        task.setTitle(request.title());
-        task.setDescription(request.description());
+        task.setCompleted(false);
 
         return TaskResponse.from(taskRepository.save(task));
     }
 
     @Transactional
-    public TaskResponse toggleTaskStatus(Long id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
+    public TaskResponse updateTask(Long id, TaskUpdateRequest request) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Задача не найдена"));
+        if (request.title() != null) task.setTitle(request.title());
+        if (request.description() != null) task.setDescription(request.description());
+        if (request.priority() != null) task.setPriority(request.priority());
+        if (request.from() != null) task.setFromDate(request.from());
+        if (request.to() != null) task.setToDate(request.to());
+        if (request.isCompleted() != null) task.setCompleted(request.isCompleted());
 
-        task.setCompleted(!task.isCompleted());
         return TaskResponse.from(taskRepository.save(task));
     }
 
