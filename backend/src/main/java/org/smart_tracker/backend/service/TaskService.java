@@ -73,14 +73,16 @@ public class TaskService {
         Task task = taskRepository.findByIdAndUser_Id(id, currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Задача с id " + id + " не найдена"));
 
-        // Если проверка прошла успешно — удаляем по ID
+        // Если проверка прошла успешно - удаляем по ID
         taskRepository.delete(task);
     }
 
     private User getCurrentUser() {
-        // Получаем имя текущего авторизованного пользователя из контекста
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
+        // Временное решение
+        return userRepository.findByUsername("test_user").orElseThrow(() -> new RuntimeException("Тестовый пользователь не найден. Проверьте Data Initializer"));
+//        // Получаем имя текущего авторизованного пользователя из контекста
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        return userRepository.findByUsername(username)
+//                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
     }
 }

@@ -31,10 +31,12 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Разрешаем всем: регистрацию, логин, сваггер
-                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        // Все остальные запросы ТОЛЬКО с токеном
-                        .anyRequest().authenticated()
+                        // Разрешен доступ без токена
+                                .anyRequest().permitAll()
+//                        // Разрешаем всем: регистрацию, логин, сваггер
+//                        .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+//                        // Все остальные запросы ТОЛЬКО с токеном
+//                        .anyRequest().authenticated()
                 )
                 // Отключаем сессии
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
