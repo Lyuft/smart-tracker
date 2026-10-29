@@ -7,7 +7,10 @@ import org.smart_tracker.backend.dto.request.TaskUpdateRequest;
 import org.smart_tracker.backend.dto.response.TaskResponse;
 import org.smart_tracker.backend.exception.ResourceNotFoundException;
 import org.smart_tracker.backend.model.Task;
+import org.smart_tracker.backend.model.User;
 import org.smart_tracker.backend.repo.TaskRepository;
+import org.smart_tracker.backend.repo.UserRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +21,18 @@ import java.util.List;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll().stream()
+        return taskRepository.findAllByUser_Id(getCurrentUser().getId()).stream()
                 .map(TaskResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public TaskResponse getTaskById(Long id) {
-        return taskRepository.findById(id)
+        return taskRepository.findByIdAndUser_Id(id, getCurrentUser().getId())
                 .map(TaskResponse::from)
                 .orElseThrow(() -> new RuntimeException("Задача с id " + id + " не найдена"));
     }
@@ -36,6 +40,7 @@ public class TaskService {
     @Transactional
     public TaskResponse createTask(TaskRequest request) {
         Task task = new Task();
+        task.setUser(getCurrentUser());
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setPriority(request.priority() != null ? request.priority() : Priority.MEDIUM);
@@ -49,7 +54,7 @@ public class TaskService {
 
     @Transactional
     public TaskResponse updateTask(Long id, TaskUpdateRequest request) {
-        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Задача не найдена"));
+        Task task = taskRepository.findByIdAndUser_Id(id, getCurrentUser().getId()).orElseThrow(() -> new ResourceNotFoundException("Задача не найдена"));
         if (request.title() != null) task.setTitle(request.title());
         if (request.description() != null) task.setDescription(request.description());
         if (request.priority() != null) task.setPriority(request.priority());
@@ -62,9 +67,22 @@ public class TaskService {
 
     @Transactional
     public void deleteTask(Long id) {
-        if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Задача с id " + id + " не найдена");
-        }
-        taskRepository.deleteById(id);
+        Long currentUserId = getCurrentUser().getId();
+
+        // Проверяем, существует ли задача с таким ID И принадлежит ли она текущему юзеру
+        Task task = taskRepository.findByIdAndUser_Id(id, currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Задача с id " + id + " не найдена"));
+
+        // Если проверка прошла успешно - удаляем по ID
+        taskRepository.delete(task);
+    }
+
+    private User getCurrentUser() {
+        // Временное решение
+        return userRepository.findByUsername("test_user").orElseThrow(() -> new RuntimeException("Тестовый пользователь не найден. Проверьте Data Initializer"));
+//        // Получаем имя текущего авторизованного пользователя из контекста
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//        return userRepository.findByUsername(username)
+//                .orElseThrow(() -> new ResourceNotFoundException("Пользователь не найден"));
     }
 }

@@ -41,6 +41,10 @@ public class Task {
     @Column(name = "to_date")
     private OffsetDateTime toDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) {
